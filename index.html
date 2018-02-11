@@ -4,9 +4,7 @@
 <head>
   <title>The Paiting App - by Kayla and Brady Holt</title>
   <style>
-    #canvas {
-      height: 100%;
-    }
+    `
   </style>
 </head>
 
@@ -20,7 +18,9 @@
     });
 
     function init() {
-      var canvas = document.getElementById('canvas');
+      let undo = [];
+      let canvas = document.getElementById('canvas');
+
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
 
@@ -28,17 +28,16 @@
 
       var princessPicture = new Image();
       princessPicture.src = "princess.jpg";
-      princessPicture.onload = function() {
+      princessPicture.onload = function () {
         princessPicture.width = princessPicture.width * 2;
         princessPicture.height = princessPicture.height * 2;
         const width = (window.innerWidth / 2) - (princessPicture.width / 2);
         const height = (window.innerHeight / 2) - (princessPicture.height / 2);
-        //ctx.fillRect(width-10,height-10,10,10);
         ctx.drawImage(princessPicture, width, height, princessPicture.width, princessPicture.height);
-        //ctx.drawImage(princessPicture, 10, 0, window.innerWidth - 40, window.innerHeight);
+        
+        // Add initial state to Undo stack
+        undo.push(canvas.toDataURL());
       }
-      
-      
 
       var painting = document.getElementById('paint');
       var paint_style = window.getComputedStyle(painting);
@@ -71,7 +70,23 @@
       var onPaint = function () {
         ctx.lineTo(mouse.x, mouse.y);
         ctx.stroke();
+
+        // Add current state to Undo stack
+        undo.push(canvas.toDataURL());
       };
+
+      // register 'u' for undo
+      document.addEventListener('keyup', (e) => {
+        if (e.keyCode == 85) {
+          // 'u' was pressed
+          if (undo.length == 0) { return; }
+          var undoImage = new Image();
+          undoImage.src = undo.pop();
+          undoImage.onload = function () {
+            ctx.drawImage(undoImage, 0, 0);
+          }
+        }
+      }, false);
     }
   </script>
 </body>
