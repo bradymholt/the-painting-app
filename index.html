@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Kayla and Daddy</title>
+  <style>
+    #canvas {
+      height: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="paint">
+    <canvas id="canvas"></canvas>
+  </div>
+  <script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function (event) {
+      init();
+    });
+
+    function init() {
+      var canvas = document.getElementById('canvas');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      var ctx = canvas.getContext('2d');
+
+      var princessPicture = new Image();
+      princessPicture.src = "princess.jpg";
+      princessPicture.onload = function() {
+        princessPicture.width = princessPicture.width * 2;
+        princessPicture.height = princessPicture.height * 2;
+        const width = (window.innerWidth / 2) - (princessPicture.width / 2);
+        const height = (window.innerHeight / 2) - (princessPicture.height / 2);
+        //ctx.fillRect(width-10,height-10,10,10);
+        ctx.drawImage(princessPicture, width, height, princessPicture.width, princessPicture.height);
+        //ctx.drawImage(princessPicture, 10, 0, window.innerWidth - 40, window.innerHeight);
+      }
+      
+      
+
+      var painting = document.getElementById('paint');
+      var paint_style = window.getComputedStyle(painting);
+      canvas.width = parseInt(paint_style.getPropertyValue('width'));
+      canvas.height = parseInt(paint_style.getPropertyValue('height'));
+
+      var mouse = { x: 0, y: 0 };
+
+      canvas.addEventListener('mousemove', function (e) {
+        mouse.x = e.pageX - this.offsetLeft;
+        mouse.y = e.pageY - this.offsetTop;
+      }, false);
+
+      ctx.lineWidth = 45;
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#EF9FF8';
+
+      canvas.addEventListener('mousedown', function (e) {
+        ctx.beginPath();
+        ctx.moveTo(mouse.x, mouse.y);
+
+        canvas.addEventListener('mousemove', onPaint, false);
+      }, false);
+
+      canvas.addEventListener('mouseup', function () {
+        canvas.removeEventListener('mousemove', onPaint, false);
+      }, false);
+
+      var onPaint = function () {
+        ctx.lineTo(mouse.x, mouse.y);
+        ctx.stroke();
+      };
+    }
+  </script>
+</body>
+
+</html>
