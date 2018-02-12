@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 <meta charset="utf-8">
-
 <head>
   <title>The Painting App</title>
   <style>
@@ -17,13 +16,21 @@
       font-size: 22px;
     }
 
+    h1, h2 {
+      margin: 3px;
+    }
+    h2 {
+      font-size: 16px;
+    }
+
     #instructions {
       position: absolute;
       bottom: 20px;
     }
 
     @media print {
-      header, aside  {
+      header,
+      aside {
         display: none;
       }
     }
@@ -39,6 +46,7 @@
     <h1>Instructions</h1>
     <ul>
       <li>Click and drag to color</li>
+      <li>Press 'b' for bigger line; 's' for smaller line</li>
       <li>Press 'u' to Undo</li>
       <li>Press ⌘+P to Print</li>
     </ul>
@@ -52,7 +60,7 @@
     });
 
     function init() {
-      let undo = [];
+      let undoStack = [];
       let canvas = document.getElementById('canvas');
 
       canvas.width = window.innerWidth;
@@ -71,7 +79,7 @@
         ctx.drawImage(princessPicture, width, height, princessPicture.width, princessPicture.height);
 
         // Add initial state to Undo stack
-        undo.push(canvas.toDataURL());
+        undoStack.push(canvas.toDataURL());
       }
 
       var painting = document.getElementById('paint');
@@ -86,7 +94,7 @@
         mouse.y = e.pageY - this.offsetTop;
       }, false);
 
-      ctx.lineWidth = 45;
+      ctx.lineWidth = 15;
       ctx.lineJoin = 'round';
       ctx.lineCap = 'round';
       ctx.strokeStyle = '#EF9FF8';
@@ -107,19 +115,39 @@
         ctx.stroke();
 
         // Add current state to Undo stack
-        undo.push(canvas.toDataURL());
+        undoStack.push(canvas.toDataURL());
       };
+
+      function undo() {
+        if (undoStack.length == 0) { return; }
+        var undoImage = new Image();
+        undoImage.src = undoStack.pop();
+        undoImage.onload = function () {
+          ctx.drawImage(undoImage, 0, 0);
+        }
+      }
+
+      function changeWidth(bigger) {
+        const changeAmount = 15;
+        if (bigger) {
+          ctx.lineWidth += changeAmount;
+        } else {
+          ctx.lineWidth -= changeAmount;
+        }
+      }
 
       // register 'u' for undo
       document.addEventListener('keyup', (e) => {
-        if (e.keyCode == 85) {
-          // 'u' was pressed
-          if (undo.length == 0) { return; }
-          var undoImage = new Image();
-          undoImage.src = undo.pop();
-          undoImage.onload = function () {
-            ctx.drawImage(undoImage, 0, 0);
-          }
+        switch (e.keyCode) {
+          case 85: // u
+            undo();
+            break;
+          case 66: // b
+            changeWidth(true);
+            break;
+          case 83: // s
+            changeWidth(false);
+            break
         }
       }, false);
     }
